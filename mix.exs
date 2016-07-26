@@ -20,7 +20,14 @@ defmodule Infobip.Mixfile do
     [
       {:httpoison, "~> 0.8"},
       {:xml_builder, "~> 0.0.8"},
-      {:erlsom, github: "willemdj/erlsom"}
+      {:erlsom, github: "willemdj/erlsom"},
+      {:excoveralls, "~> 0.5", only: :test},
+      {:earmark, "~> 0.2", only: :dev},
+      {:ex_doc, "~> 0.11", only: :dev},
+      {:dialyxir, "~> 0.3", only: :dev},
+      {:credo, "~> 0.3", only: :dev},
+      {:bypass, "~> 0.1", only: :test},
+      {:inch_ex, "~> 0.5", only: :docs}
     ]
   end
 
