@@ -10,3 +10,7 @@ A simple Infobip REST API client for Elixir.
 
 You can find the hex package [here](https://hex.pm/packages/infobip), and the docs [here](http://hexdocs.pm/infobip).
 
+## NOTE
+
+Currently only supports the HTTP interface, and not the SNMP interface.
+

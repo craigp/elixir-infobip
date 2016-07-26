@@ -12,13 +12,15 @@ defmodule Infobip.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :httpoison],
+    [applications: [:logger, :httpoison, :xml_builder],
      mod: {Infobip, []}]
   end
 
   defp deps do
     [
-      {:httpoison, "~> 0.8"}
+      {:httpoison, "~> 0.8"},
+      {:xml_builder, "~> 0.0.8"},
+      {:erlsom, github: "willemdj/erlsom"}
     ]
   end
 
