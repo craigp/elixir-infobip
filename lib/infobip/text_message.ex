@@ -6,6 +6,8 @@ defmodule Infobip.TextMessage do
   @retry_intervals [10_000, 30_000, 60_000]
   @send_interval 100
 
+  #  Server API {{{ #
+
   @doc false
   def start_link(recipient, message) do
     Logger.debug "Starting server to send text message to #{recipient}"
@@ -38,6 +40,10 @@ defmodule Infobip.TextMessage do
     end
   end
 
+  #  }}} Server API #
+
+  #  Client API {{{ #
+
   @doc """
   Builds valid XML for the Infobip text message API.
   """
@@ -69,11 +75,7 @@ defmodule Infobip.TextMessage do
     ]} |> XmlBuilder.generate
   end
 
-  def send(recipient, message) do
-    {:ok, _pid} = Supervisor.start_child(Infobip.TextMessageSupervisor, [recipient, message])
-  end
-
-  defp build_message(message_id, recipient, message) do
+  def build_message(message_id, recipient, message) do
     Logger.debug "Building XML for text message #{message_id} to #{recipient}"
     %{
       system_id: system_id,
@@ -101,7 +103,18 @@ defmodule Infobip.TextMessage do
     ]} |> XmlBuilder.generate
   end
 
-  defp do_send(recipient, message, retries) do
+  @doc """
+  Sends a text message to the recipient.
+  """
+  def send(recipient, message) do
+    {:ok, _pid} = Supervisor.start_child(Infobip.TextMessageSupervisor, [recipient, message])
+  end
+
+  #  }}} Client API #
+
+  #  Private functions {{{ #
+
+  def do_send(recipient, message, retries) do
     Logger.debug "Sending text message to #{recipient}"
     build_message(recipient, message)
     |> Infobip.Helper.send
@@ -122,4 +135,6 @@ defmodule Infobip.TextMessage do
         :done
     end
   end
+
+  #  }}} Private functions #
 end
