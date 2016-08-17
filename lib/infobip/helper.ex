@@ -17,13 +17,19 @@ defmodule Infobip.Helper do
   Loads the Infobip config.
   """
   def extract_config do
-    Enum.into(Application.get_env(:infobip, :http), %{})
+    case Application.get_env(:infobip, :http) do
+      nil ->
+        raise "No :infobip config for env #{Mix.env}"
+      config ->
+        config
+        |> Enum.into(%{})
+    end
   end
 
   defp handle_infobip_response({:ok, response}) do
     case :erlsom.simple_form(response.body) do
       {:ok, xml, _} ->
-        parse_valid_xml(xml)
+        parse_valid_xml(xml, response)
       {:error, reason} ->
         {:error, "Infobip XML response could not be parsed: #{reason}"}
     end
@@ -40,19 +46,19 @@ defmodule Infobip.Helper do
     end
   end
 
-  defp parse_valid_xml(xml) do
+  defp parse_valid_xml(xml, response) do
     case xml do
       {'RESPONSE', [], [{'status', [], [status_code]}, {'credits', [], [_credits]}]} ->
         case to_string(status_code) do
           "-1" ->
             {:error, :auth_failed}
           "-2" ->
-            Logger.error("Failed text message XML: #{xml}")
+            Logger.error("Failed text message XML: #{response.body}")
             {:error, :xml_error}
           "-3" ->
             {:error, :not_enough_credits}
           "-4" ->
-            Logger.error("Failed text message XML: #{xml}")
+            Logger.error("Failed text message XML: #{response.body}")
             {:error, :no_recipients}
           "-5" ->
             {:error, :general_error}
@@ -60,7 +66,7 @@ defmodule Infobip.Helper do
             {:ok, String.to_integer(message_count)}
         end
       _else ->
-        {:error, "Unrecognised response: #{xml}"}
+        {:error, "Unrecognised response: #{response.body}"}
     end
   end
 

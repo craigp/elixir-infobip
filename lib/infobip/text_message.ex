@@ -16,12 +16,6 @@ defmodule Infobip.TextMessage do
   end
 
   @doc false
-  def handle_info(:send, state) do
-    GenServer.cast(self, :send)
-    {:noreply, state}
-  end
-
-  @doc false
   def handle_call(:send, _from, %{
     recipient: recipient,
     message: message,

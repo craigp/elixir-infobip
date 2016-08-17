@@ -3,7 +3,7 @@ defmodule Infobip.Mixfile do
 
   def project do
     [app: :infobip,
-     version: "0.0.3",
+     version: "0.0.4",
      deps: deps,
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test],
