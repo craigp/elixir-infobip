@@ -133,10 +133,13 @@ defmodule Infobip.TextMessageTest do
       Plug.Conn.resp(conn, 200, auth_failed_response)
     end
     retries = 0
-    {:error, :auth_failed, _xml} =
-      Infobip.TextMessage.build_message(recipient, message)
+    {:error, :auth_failed} =
+      recipient
+      |> Infobip.TextMessage.build_message(message)
       |> Infobip.Helper.send
-    {:error, :auth_failed, _xml} = Infobip.TextMessage.do_send(recipient, message, retries)
+    {:error, :auth_failed} =
+      recipient
+      |> Infobip.TextMessage.do_send(message, retries)
   end
 
   test "responds properly to general_error, no more retries" do
