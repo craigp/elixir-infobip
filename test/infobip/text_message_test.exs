@@ -82,7 +82,7 @@ defmodule Infobip.TextMessageTest do
     recipient: recipient,
     message: message
   } do
-    xml = Infobip.TextMessage.build_message(message_id, recipient, message)
+    xml = Infobip.TextMessage.build_message(recipient, message, message_id)
     xml = String.replace(xml, ~r/[\n\t\s]/, "")
     valid_xml = """
 <SMS>
@@ -120,7 +120,7 @@ defmodule Infobip.TextMessageTest do
       |> Infobip.Helper.send
   end
 
-  test "responds properly to auth_failed error, retries", %{
+  test "responds properly to auth_failed error", %{
     bypass: bypass,
     recipient: recipient,
     message: message,
@@ -136,7 +136,7 @@ defmodule Infobip.TextMessageTest do
     {:error, :auth_failed} =
       Infobip.TextMessage.build_message(recipient, message)
       |> Infobip.Helper.send
-    :retry = Infobip.TextMessage.do_send(recipient, message, retries)
+    {:error, :auth_failed} = Infobip.TextMessage.do_send(recipient, message, retries)
   end
 
   test "responds properly to general_error, no more retries" do

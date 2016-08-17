@@ -2,22 +2,17 @@ defmodule Infobip.TextMessage do
   use GenServer
   require Logger
 
-  @max_retries 3
-  @retry_intervals [10_000, 30_000, 60_000]
-  @send_interval 100
-
   #  Server API {{{ #
 
   @doc false
-  def start_link(recipient, message) do
+  def start_link(recipient, message, message_id) do
     Logger.debug "Starting server to send text message to #{recipient}"
-    GenServer.start_link(__MODULE__, [recipient, message])
+    GenServer.start_link(__MODULE__, {recipient, message, message_id})
   end
 
   @doc false
-  def init([recipient, message]) do
-    Process.send_after(self, :send, @send_interval)
-    {:ok, %{recipient: recipient, message: message, retries: 0}}
+  def init({recipient, message, message_id}) do
+    {:ok, %{recipient: recipient, message: message, message_id: message_id}}
   end
 
   @doc false
@@ -27,16 +22,16 @@ defmodule Infobip.TextMessage do
   end
 
   @doc false
-  def handle_cast(:send, %{
+  def handle_call(:send, _from, %{
     recipient: recipient,
     message: message,
-    retries: retries
+    message_id: message_id
   } = state) do
-    case do_send(recipient, message, retries) do
-      :done ->
-        {:stop, :normal, state}
-      :retry ->
-        {:noreply, %{state | retries: retries + 1}}
+    case do_send(recipient, message, message_id) do
+      {:ok, count} ->
+        {:stop, :normal, {:ok, count}, state}
+      {:error, reason} ->
+        {:stop, :normal, {:error, reason}, state}
     end
   end
 
@@ -47,8 +42,9 @@ defmodule Infobip.TextMessage do
   @doc """
   Builds valid XML for the Infobip text message API.
   """
-  def build_message(recipient, message) do
-    Logger.debug "Building XML for text message to #{recipient}"
+  def build_message(recipient, message), do: build_message(recipient, message, nil)
+
+  def build_message(recipient, message, nil) do
     %{
       system_id: system_id,
       password: password,
@@ -75,8 +71,7 @@ defmodule Infobip.TextMessage do
     ]} |> XmlBuilder.generate
   end
 
-  def build_message(message_id, recipient, message) do
-    Logger.debug "Building XML for text message #{message_id} to #{recipient}"
+  def build_message(recipient, message, message_id) do
     %{
       system_id: system_id,
       password: password,
@@ -103,37 +98,14 @@ defmodule Infobip.TextMessage do
     ]} |> XmlBuilder.generate
   end
 
-  @doc """
-  Sends a text message to the recipient.
-  """
-  def send(recipient, message) do
-    {:ok, _pid} = Supervisor.start_child(Infobip.TextMessageSupervisor, [recipient, message])
-  end
-
   #  }}} Client API #
 
   #  Private functions {{{ #
 
-  def do_send(recipient, message, retries) do
-    Logger.debug "Sending text message to #{recipient}"
-    build_message(recipient, message)
+  def do_send(recipient, message, message_id) do
+    recipient
+    |> build_message(message, message_id)
     |> Infobip.Helper.send
-    |> case do
-      {:error, reason} ->
-        Logger.error "Failed to send text message to #{recipient} (#{reason})"
-        cond do
-          retries >= @max_retries ->
-            Logger.debug "No more retries for text message to #{recipient}, giving up"
-            :done
-          true ->
-            Logger.debug "Text message to #{recipient} retry #{retries}/#{@max_retries}"
-            Process.send_after(self, :send, Enum.at(@retry_intervals, retries))
-            :retry
-        end
-      {:ok, _count} ->
-        Logger.debug "Successfully send text message to #{recipient}"
-        :done
-    end
   end
 
   #  }}} Private functions #
