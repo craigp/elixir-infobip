@@ -14,7 +14,7 @@ You can find the hex package [here](https://hex.pm/packages/infobip), and the do
 
 ```elixir
 def deps do
-  [{:infobip, "~> 0.1"}]
+  [{:infobip, "~> 0.0.3"}]
 end
 ```
 
@@ -34,13 +34,21 @@ an example of what is required.
 Then sending a text message is as easy as:
 
 ```elixir
-{:ok, pid} = Infobip.TextMessage.send("27820001111", "Test message")
+{:ok, pid} = Infobip.send("27820001111", "Test message")
 ```
 
-You need to pass a valid international mobile number to the `send/2` method.
+You can optionally specify a message ID if you want to fetch delivery reports
+(still to be implemented, see TODO below):
+
+```elixir
+{:ok, pid} = Infobip.send("27820001111", "Test message", 123)
+```
+
+You need to pass a valid international mobile number to the `send` method.
 
 ## TODO
 
 * [x] Send text messages
+* [ ] Documentation
 * [ ] Fetch delivery reports
 * [ ] SMPP interface

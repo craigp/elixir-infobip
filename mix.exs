@@ -12,7 +12,7 @@ defmodule Infobip.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :httpoison, :xml_builder],
+    [applications: [:logger, :httpoison, :xml_builder, :erlsom],
      mod: {Infobip, []}]
   end
 
