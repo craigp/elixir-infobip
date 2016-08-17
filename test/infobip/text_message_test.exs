@@ -99,7 +99,7 @@ defmodule Infobip.TextMessageTest do
     <Destnpi>1</Destnpi>
   </message>
   <recipients>
-    <gsm messageId="#{message_id}">
+    <gsm messageId=\"#{message_id}\">
       #{recipient}
     </gsm>
   </recipients>
@@ -133,10 +133,10 @@ defmodule Infobip.TextMessageTest do
       Plug.Conn.resp(conn, 200, auth_failed_response)
     end
     retries = 0
-    {:error, :auth_failed} =
+    {:error, :auth_failed, _xml} =
       Infobip.TextMessage.build_message(recipient, message)
       |> Infobip.Helper.send
-    {:error, :auth_failed} = Infobip.TextMessage.do_send(recipient, message, retries)
+    {:error, :auth_failed, _xml} = Infobip.TextMessage.do_send(recipient, message, retries)
   end
 
   test "responds properly to general_error, no more retries" do

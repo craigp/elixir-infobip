@@ -31,7 +31,7 @@ defmodule Infobip.Helper do
       {:ok, xml, _} ->
         parse_valid_xml(xml, response)
       {:error, reason} ->
-        {:error, "Infobip XML response could not be parsed: #{reason}"}
+        {:error, "Infobip XML response could not be parsed: #{reason}", response.body}
     end
   end
 
@@ -51,22 +51,22 @@ defmodule Infobip.Helper do
       {'RESPONSE', [], [{'status', [], [status_code]}, {'credits', [], [_credits]}]} ->
         case to_string(status_code) do
           "-1" ->
-            {:error, :auth_failed}
+            {:error, :auth_failed, response.body}
           "-2" ->
             Logger.error("Failed text message XML: #{response.body}")
-            {:error, :xml_error}
+            {:error, :xml_error, response.body}
           "-3" ->
-            {:error, :not_enough_credits}
+            {:error, :not_enough_credits, response.body}
           "-4" ->
             Logger.error("Failed text message XML: #{response.body}")
-            {:error, :no_recipients}
+            {:error, :no_recipients, response.body}
           "-5" ->
-            {:error, :general_error}
+            {:error, :general_error, response.body}
           message_count ->
             {:ok, String.to_integer(message_count)}
         end
       _else ->
-        {:error, "Unrecognised response: #{response.body}"}
+        {:error, "Unrecognised response: #{response.body}", response.body}
     end
   end
 
