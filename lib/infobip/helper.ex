@@ -58,7 +58,7 @@ defmodule Infobip.Helper do
           "-3" ->
             {:error, :not_enough_credits, response}
           "-4" ->
-            Logger.error("Failed text message XML: #{response}")
+            Logger.error("Failed text message XML: #{payload}")
             {:error, :no_recipients}
           "-5" ->
             {:error, :general_error}
