@@ -10,7 +10,8 @@ defmodule Infobip.TextMessageTest do
     message = "This is a test message"
     bypass = Bypass.open
     Application.put_env :infobip, :http, [
-      url: "http://localhost:#{bypass.port}/infobip/",
+      send_url: "http://localhost:#{bypass.port}/api/sendsms/xml",
+      delivery_report_url: "http://localhost:#{bypass.port}/api/dlrpull",
       source_msisdn: "",
       host: "smpp3.infobip.com",
       port: 8888,
@@ -31,7 +32,7 @@ defmodule Infobip.TextMessageTest do
       bypass: bypass,
       message: message,
       recipient: recipient,
-      valid_response: """
+      valid_send_response: """
 <RESPONSE>
   <status>1</status>
   <credits>100</credits>
@@ -127,7 +128,7 @@ defmodule Infobip.TextMessageTest do
     auth_failed_response: auth_failed_response
   } do
     Bypass.expect bypass, fn conn ->
-      assert "/infobip/" == conn.request_path
+      assert "/api/sendsms/xml" == conn.request_path
       assert "" == conn.query_string
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, auth_failed_response)
@@ -135,7 +136,7 @@ defmodule Infobip.TextMessageTest do
     retries = 0
     {:error, :auth_failed} =
       recipient
-      |> Infobip.TextMessage.build_message(message)
+      |> Infobip.send(message)
       |> Infobip.Helper.send
     {:error, :auth_failed} =
       recipient
@@ -146,8 +147,27 @@ defmodule Infobip.TextMessageTest do
 
   end
 
-  test "sends a text message successfully" do
-
+  test "sends a text message successfully", %{
+    recipient: recipient,
+    bypass: bypass,
+    valid_send_response: valid_send_response,
+    message: message,
+    message_id: message_id
+  } do
+    Bypass.expect bypass, fn conn ->
+      assert "/api/sendsms/xml" == conn.request_path
+      assert "" == conn.query_string
+      assert "POST" == conn.method
+      Plug.Conn.resp(conn, 200, valid_send_response)
+    end
+    {:ok, 1} =
+      recipient
+      |> Infobip.send(message)
+      |> Infobip.Helper.send
+    {:ok, 1} =
+      recipient
+      |> Infobip.send(message, message_id)
+      |> Infobip.Helper.send
   end
 
 end

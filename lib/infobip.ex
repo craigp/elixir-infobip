@@ -17,4 +17,8 @@ defmodule Infobip do
     GenServer.call(pid, :send)
   end
 
+  def delivery_report(message_id) do
+    Infobip.Helper.delivery_report(message_id)
+  end
+
 end
