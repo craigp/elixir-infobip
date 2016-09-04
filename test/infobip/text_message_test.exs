@@ -137,7 +137,6 @@ defmodule Infobip.TextMessageTest do
     {:error, :auth_failed} =
       recipient
       |> Infobip.send(message)
-      |> Infobip.Helper.send
     {:error, :auth_failed} =
       recipient
       |> Infobip.TextMessage.do_send(message, retries)
@@ -163,11 +162,9 @@ defmodule Infobip.TextMessageTest do
     {:ok, 1} =
       recipient
       |> Infobip.send(message)
-      |> Infobip.Helper.send
     {:ok, 1} =
       recipient
       |> Infobip.send(message, message_id)
-      |> Infobip.Helper.send
   end
 
 end
