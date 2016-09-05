@@ -1,7 +1,8 @@
 use Mix.Config
 
 config :infobip, :http,
-  url: "http://api2.infobip.com/api/sendsms/xml",
+  send_url: "http://api2.infobip.com/api/sendsms/xml",
+  delivery_report_url: "http://api2.infobip.com/api/dlrpull",
   source_msisdn: "",
   host: "smpp3.infobip.com",
   port: 8888,
