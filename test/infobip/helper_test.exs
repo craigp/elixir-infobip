@@ -23,7 +23,7 @@ defmodule Infobip.HelperTest do
       source_msisdn: "",
       host: "smpp3.infobip.com",
       port: 8888,
-      system_id: "PayDNA",
+      system_id: "Infobip",
       password: "password",
       system_type: "",
       interface_version: 52,
@@ -51,7 +51,7 @@ defmodule Infobip.HelperTest do
   } do
     Bypass.expect bypass, fn conn ->
       assert "/api/dlrpull" == conn.request_path
-      assert "user=PayDNA&password=password&messageId=1234" == conn.query_string
+      assert "user=Infobip&password=password&messageId=1234" == conn.query_string
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, no_data_response)
     end
@@ -66,7 +66,7 @@ defmodule Infobip.HelperTest do
   } do
     Bypass.expect bypass, fn conn ->
       assert "/api/dlrpull" == conn.request_path
-      assert "user=PayDNA&password=password&messageId=1234" == conn.query_string
+      assert "user=Infobip&password=password&messageId=1234" == conn.query_string
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, valid_delivery_report_response)
     end

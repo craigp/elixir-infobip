@@ -40,6 +40,7 @@ defmodule Infobip.TextMessage do
 
   def build_message(recipient, message, nil) do
     %{
+      sender: sender,
       system_id: system_id,
       password: password,
       source_ton: source_ton,
@@ -53,7 +54,7 @@ defmodule Infobip.TextMessage do
         {:username, nil, system_id},
         {:password, nil, password}
       ]}, {:message, nil, [
-        {:sender, nil, "paydna"},
+        {:sender, nil, sender},
         {:text, nil, message},
         {:Srcton, nil, source_ton},
         {:Srcnpi, nil, source_npi},
@@ -67,6 +68,7 @@ defmodule Infobip.TextMessage do
 
   def build_message(recipient, message, message_id) do
     %{
+      sender: sender,
       system_id: system_id,
       password: password,
       source_ton: source_ton,
@@ -80,7 +82,7 @@ defmodule Infobip.TextMessage do
         {:username, nil, system_id},
         {:password, nil, password}
       ]}, {:message, nil, [
-        {:sender, nil, "paydna"},
+        {:sender, nil, sender},
         {:text, nil, message},
         {:Srcton, nil, source_ton},
         {:Srcnpi, nil, source_npi},

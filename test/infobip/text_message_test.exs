@@ -13,9 +13,10 @@ defmodule Infobip.TextMessageTest do
       send_url: "http://localhost:#{bypass.port}/api/sendsms/xml",
       delivery_report_url: "http://localhost:#{bypass.port}/api/dlrpull",
       source_msisdn: "",
+      sender: "infobip",
       host: "smpp3.infobip.com",
       port: 8888,
-      system_id: "PayDNA",
+      system_id: "Infobip",
       password: "password",
       system_type: "",
       interface_version: 52,
@@ -53,14 +54,14 @@ defmodule Infobip.TextMessageTest do
   } do
     xml = Infobip.TextMessage.build_message(recipient, message)
     xml = String.replace(xml, ~r/[\n\t\s]/, "")
-    valid_xml = """
+    valid_xml = ~s"""
 <SMS>
   <authentification>
-    <username>PayDNA</username>
+    <username>Infobip</username>
     <password>password</password>
   </authentification>
   <message>
-    <sender>paydna</sender>
+    <sender>infobip</sender>
     <text>#{message}</text>
     <Srcton>0</Srcton>
     <Srcnpi>1</Srcnpi>
@@ -85,14 +86,14 @@ defmodule Infobip.TextMessageTest do
   } do
     xml = Infobip.TextMessage.build_message(recipient, message, message_id)
     xml = String.replace(xml, ~r/[\n\t\s]/, "")
-    valid_xml = """
+    valid_xml = ~s"""
 <SMS>
   <authentification>
-    <username>PayDNA</username>
+    <username>Infobip</username>
     <password>password</password>
   </authentification>
   <message>
-    <sender>paydna</sender>
+    <sender>infobip</sender>
     <text>#{message}</text>
     <Srcton>0</Srcton>
     <Srcnpi>1</Srcnpi>
