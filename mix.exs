@@ -20,16 +20,16 @@ defmodule Infobip.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 0.9.0"},
+      {:httpoison, "~> 0.9"},
       {:xml_builder, "~> 0.0.8"},
-      {:erlsom, github: "willemdj/erlsom"},
-      {:excoveralls, "~> 0.5.5", only: :test},
-      {:earmark, "~> 1.0.1", only: :dev},
-      {:ex_doc, "~> 0.13.0", only: :dev},
-      {:dialyxir, "~> 0.3.5", only: :dev},
-      {:credo, "~> 0.4.8", only: :dev},
-      {:bypass, "~> 0.5.1", only: :test},
-      {:inch_ex, "~> 0.5.3", only: :docs}
+      {:erlsom, "~> 1.4"},
+      {:excoveralls, "~> 0.5", only: :test},
+      {:earmark, "~> 1.0", only: :dev},
+      {:ex_doc, "~> 0.13", only: :dev},
+      {:dialyxir, "~> 0.3", only: :dev},
+      {:credo, "~> 0.4", only: :dev},
+      {:bypass, "~> 0.5", only: :test},
+      {:inch_ex, "~> 0.5", only: :docs}
     ]
   end
 
