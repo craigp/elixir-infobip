@@ -1,10 +1,12 @@
 ExUnit.start
 
-defmodule Infobip.HelperTest do
+defmodule Infobip.DeliveryReportTest do
+
   use ExUnit.Case
+  alias Infobip.DeliveryReport
 
   setup do
-    message_id = 1234
+    message_id = "1234"
     delivered = {'DeliveryReport', [],
      [{'message', [{'pducount', '1'}, {'price', '17.0000'}, {'gsmerror', '0'},
         {'status', 'DELIVERED'}, {'donedate', '2016/09/04 15:40:22'},
@@ -21,6 +23,7 @@ defmodule Infobip.HelperTest do
       send_url: "http://localhost:#{bypass.port}/api/sendsms/xml",
       delivery_report_url: "http://localhost:#{bypass.port}/api/dlrpull",
       source_msisdn: "",
+      sender: "infobip",
       host: "smpp3.infobip.com",
       port: 8888,
       system_id: "Infobip",
@@ -36,12 +39,42 @@ defmodule Infobip.HelperTest do
       enquire_link_delay_secs: 10
     ]
     {:ok, %{
-      delivered: delivered,
-      bypass: bypass,
-      valid_delivery_report_response: valid_delivery_report_response,
       message_id: message_id,
+      bypass: bypass,
+      delivered: delivered,
+      valid_delivery_report_response: valid_delivery_report_response,
       no_data_response: no_data_response
     }}
+  end
+
+  test "handles a delivery report for a delivered messge that has already been fetched", %{
+    no_data_response: no_data_response,
+    bypass: bypass,
+    message_id: message_id
+  } do
+    Bypass.expect bypass, fn conn ->
+      assert "/api/dlrpull" == conn.request_path
+      assert "user=Infobip&password=password&messageId=1234" == conn.query_string
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, no_data_response)
+    end
+    response = DeliveryReport.fetch(message_id)
+    assert response == {:ok, :unknown}
+  end
+
+  test "handles a delivery report for a delivered message", %{
+    valid_delivery_report_response: valid_delivery_report_response,
+    bypass: bypass,
+    message_id: message_id
+  } do
+    Bypass.expect bypass, fn conn ->
+      assert "/api/dlrpull" == conn.request_path
+      assert "user=Infobip&password=password&messageId=1234" == conn.query_string
+      assert "GET" == conn.method
+      Plug.Conn.resp(conn, 200, valid_delivery_report_response)
+    end
+    response = Infobip.delivery_report(message_id)
+    assert response == {:ok, {:delivered, "2016/09/04 15:51:45"}}
   end
 
 end

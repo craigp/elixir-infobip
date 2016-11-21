@@ -3,7 +3,7 @@ defmodule Infobip.Mixfile do
 
   def project do
     [app: :infobip,
-     version: "0.0.11",
+     version: "0.1.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps,
@@ -14,8 +14,7 @@ defmodule Infobip.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :httpoison, :xml_builder, :erlsom],
-     mod: {Infobip, []}]
+    [applications: [:logger, :httpoison, :xml_builder, :erlsom]]
   end
 
   defp deps do

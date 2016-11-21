@@ -3,9 +3,10 @@ ExUnit.start
 defmodule Infobip.TextMessageTest do
 
   use ExUnit.Case
+  alias Infobip.TextMessage
 
   setup do
-    message_id = 1234
+    message_id = "1234"
     recipient = "27821115555"
     message = "This is a test message"
     bypass = Bypass.open
@@ -48,78 +49,13 @@ defmodule Infobip.TextMessageTest do
     }}
   end
 
-  test "builds valid XML for the Infobip API, without a message ID", %{
-    recipient: recipient,
-    message: message
-  } do
-    xml = Infobip.TextMessage.build_message(recipient, message)
-    xml = String.replace(xml, ~r/[\n\t\s]/, "")
-    valid_xml = ~s"""
-<SMS>
-  <authentification>
-    <username>Infobip</username>
-    <password>password</password>
-  </authentification>
-  <message>
-    <sender>infobip</sender>
-    <text>#{message}</text>
-    <Srcton>0</Srcton>
-    <Srcnpi>1</Srcnpi>
-    <Destton>1</Destton>
-    <Destnpi>1</Destnpi>
-  </message>
-  <recipients>
-    <gsm>
-      #{recipient}
-    </gsm>
-  </recipients>
-</SMS>
-"""
-    valid_xml = String.replace(valid_xml, ~r/[\n\t\s]/, "")
-    assert xml == valid_xml
-  end
-
-  test "builds valid XML for the Infobip API, with a message ID", %{
-    message_id: message_id,
-    recipient: recipient,
-    message: message
-  } do
-    xml = Infobip.TextMessage.build_message(recipient, message, message_id)
-    xml = String.replace(xml, ~r/[\n\t\s]/, "")
-    valid_xml = ~s"""
-<SMS>
-  <authentification>
-    <username>Infobip</username>
-    <password>password</password>
-  </authentification>
-  <message>
-    <sender>infobip</sender>
-    <text>#{message}</text>
-    <Srcton>0</Srcton>
-    <Srcnpi>1</Srcnpi>
-    <Destton>1</Destton>
-    <Destnpi>1</Destnpi>
-  </message>
-  <recipients>
-    <gsm messageId=\"#{message_id}\">
-      #{recipient}
-    </gsm>
-  </recipients>
-</SMS>
-"""
-    valid_xml = String.replace(valid_xml, ~r/[\n\t\s]/, "")
-    assert xml == valid_xml
-  end
-
   test "fails properly when Infobip API cannot be reached", %{
     bypass: bypass,
     recipient: recipient,
     message: message
   } do
     Bypass.down(bypass)
-    {:error, "Could not reach Infobip API"} =
-      Infobip.TextMessage.build_message(recipient, message)
-      |> Infobip.Helper.send
+    {:error, {:http, "Could not reach Infobip API"}} = TextMessage.send(recipient, message)
   end
 
   test "responds properly to auth_failed error", %{
@@ -134,13 +70,8 @@ defmodule Infobip.TextMessageTest do
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, auth_failed_response)
     end
-    retries = 0
-    {:error, :auth_failed} =
-      recipient
-      |> Infobip.send(message)
-    {:error, :auth_failed} =
-      recipient
-      |> Infobip.TextMessage.do_send(message, retries)
+    assert {:error, {:infobip, :auth_failed}} == Infobip.send(recipient, message)
+    assert {:error, {:infobip, :auth_failed}} == TextMessage.send(recipient, message)
   end
 
   test "responds properly to general_error, no more retries" do

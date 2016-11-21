@@ -1,108 +1,86 @@
 defmodule Infobip.TextMessage do
-  use GenServer
-  require Logger
 
-  #  Server API {{{ #
+  @moduledoc """
+  Builds and sends a text message.
+  """
 
-  @doc false
-  def start_link(recipient, message, message_id) do
-    Logger.debug "Starting server to send text message to #{recipient}"
-    GenServer.start_link(__MODULE__, {recipient, message, message_id})
+  alias Infobip.{Helper, Message}
+  alias HTTPoison.{Response, Error}
+  import Message
+  import Helper, only: [http_config: 0, handle_http_error: 1]
+  import HTTPoison, only: [post: 3]
+
+  @headers [{"content-type", "text/xml; charset=utf-8"}]
+
+  @type send_response :: {atom, integer} | {atom, {atom, any}}
+
+  @doc """
+  Sends a text message.
+  """
+  @spec send(String.t, String.t) :: send_response
+  def send(recipient, message)
+  when is_binary(recipient)
+  and is_binary(message)
+  do
+    recipient
+    |> build_message(message)
+    |> do_send
   end
 
-  @doc false
-  def init({recipient, message, message_id}) do
-    {:ok, %{recipient: recipient, message: message, message_id: message_id}}
+  @spec send(String.t, String.t, String.t) :: send_response
+  def send(recipient, message, message_id)
+  when is_binary(recipient)
+  and is_binary(message)
+  and is_binary(message_id)
+  do
+    recipient
+    |> build_message(message, message_id)
+    |> do_send
   end
 
-  @doc false
-  def handle_call(:send, _from, %{
-    recipient: recipient,
-    message: message,
-    message_id: message_id
-  } = state) do
-    case do_send(recipient, message, message_id) do
-      {:ok, count} ->
-        {:stop, :normal, {:ok, count}, state}
+  @spec do_send(String.t) :: send_response
+  defp do_send(payload) when is_binary(payload) do
+    http_config
+    |> Map.get(:send_url)
+    |> post(payload, @headers)
+    |> handle_send_reponse
+  end
+
+  @spec handle_send_reponse({atom, map}) :: send_response
+  defp handle_send_reponse({:ok, %Response{body: body}}) do
+    case :erlsom.simple_form(body) do
+      {:ok, xml, _} ->
+        parse_valid_send(xml)
       {:error, reason} ->
-        {:stop, :normal, {:error, reason}, state}
+        {:error, {:erlsom, reason}}
     end
   end
 
-  #  }}} Server API #
-
-  #  Client API {{{ #
-
-  @doc """
-  Builds valid XML for the Infobip text message API.
-  """
-  def build_message(recipient, message), do: build_message(recipient, message, nil)
-
-  def build_message(recipient, message, nil) do
-    %{
-      sender: sender,
-      system_id: system_id,
-      password: password,
-      source_ton: source_ton,
-      source_npi: source_npi,
-      destination_ton: destination_ton,
-      destination_npi: destination_npi
-    } = Infobip.Helper.extract_config
-
-    {:SMS, nil, [
-      {:authentification, nil, [
-        {:username, nil, system_id},
-        {:password, nil, password}
-      ]}, {:message, nil, [
-        {:sender, nil, sender},
-        {:text, nil, message},
-        {:Srcton, nil, source_ton},
-        {:Srcnpi, nil, source_npi},
-        {:Destton, nil, destination_ton},
-        {:Destnpi, nil, destination_npi}
-      ]}, {:recipients, nil, [
-        {:gsm, nil, recipient}
-      ]}
-    ]} |> XmlBuilder.generate
+  defp handle_send_reponse({:error, %Error{id: _id, reason: reason}}) do
+    handle_http_error(reason)
   end
 
-  def build_message(recipient, message, message_id) do
-    %{
-      sender: sender,
-      system_id: system_id,
-      password: password,
-      source_ton: source_ton,
-      source_npi: source_npi,
-      destination_ton: destination_ton,
-      destination_npi: destination_npi
-    } = Infobip.Helper.extract_config
-
-    {:SMS, nil, [
-      {:authentification, nil, [
-        {:username, nil, system_id},
-        {:password, nil, password}
-      ]}, {:message, nil, [
-        {:sender, nil, sender},
-        {:text, nil, message},
-        {:Srcton, nil, source_ton},
-        {:Srcnpi, nil, source_npi},
-        {:Destton, nil, destination_ton},
-        {:Destnpi, nil, destination_npi}
-      ]}, {:recipients, nil, [
-        {:gsm, %{messageId: message_id}, recipient}
-      ]}
-    ]} |> XmlBuilder.generate
+  @spec parse_valid_send(tuple) :: send_response
+  defp parse_valid_send(xml) do
+    case xml do
+      {'RESPONSE', [], [{'status', [], [status_code]}, {'credits', [], [_credits]}]} ->
+        case to_string(status_code) do
+          "-1" ->
+            {:error, {:infobip, :auth_failed}}
+          "-2" ->
+            {:error, {:infobip, :xml_error}}
+          "-3" ->
+            {:error, {:infobip, :not_enough_credits}}
+          "-4" ->
+            {:error, {:infobip, :no_recipients}}
+          "-5" ->
+            {:error, {:infobip, :general_error}}
+          message_count ->
+            {:ok, String.to_integer(message_count)}
+        end
+      _else ->
+        {:error, {:parse, "Unrecognised response"}}
+    end
   end
 
-  #  }}} Client API #
-
-  #  Private functions {{{ #
-
-  def do_send(recipient, message, message_id) do
-    recipient
-    |> build_message(message, message_id)
-    |> Infobip.Helper.send
-  end
-
-  #  }}} Private functions #
 end
