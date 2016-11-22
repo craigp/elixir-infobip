@@ -26,7 +26,7 @@ defmodule Infobip.DeliveryReport do
 
   @spec handle_delivery_report_response({atom, map}) :: fetch_response
   defp handle_delivery_report_response({:ok, %Response{body: "NO_DATA", status_code: 200}}) do
-    {:ok, :unknown}
+    {:ok, {:unknown, "NO_DATA"}}
   end
 
   defp handle_delivery_report_response({:ok, %Response{body: body, status_code: 200}}) do

@@ -57,11 +57,10 @@ defmodule Infobip do
   Sends a text message.
   """
   @spec send(String.t, String.t) :: TextMessage.send_response
-  @spec send(String.t, String.t, String.t) :: TextMessage.send_response
+  @spec send(String.t, String.t, any) :: TextMessage.send_response
   def send(recipient, message)
   when is_binary(recipient)
-  and is_binary(message)
-  do
+  and is_binary(message) do
     TextMessage.send(recipient, message)
   end
 
@@ -72,12 +71,20 @@ defmodule Infobip do
     TextMessage.send(recipient, message, message_id)
   end
 
+  def send(recipient, message, message_id)
+  when is_binary(recipient)
+  and is_binary(message) do
+    send(recipient, message, to_string(message_id))
+  end
+
   @doc """
   Fetches a text message delivery report.
   """
-  @spec delivery_report(String.t) :: DeliveryReport.fetch_response
+  @spec delivery_report(any) :: DeliveryReport.fetch_response
   def delivery_report(message_id) when is_binary(message_id) do
     DeliveryReport.fetch(message_id)
   end
+
+  def delivery_report(message_id), do: delivery_report(to_string(message_id))
 
 end
