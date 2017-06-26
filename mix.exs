@@ -3,7 +3,7 @@ defmodule Infobip.Mixfile do
 
   def project do
     [app: :infobip,
-     version: "0.1.1",
+     version: "0.1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps,
@@ -20,7 +20,7 @@ defmodule Infobip.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 0.9"},
-      {:xml_builder, "~> 0.0.8"},
+      {:xml_builder, "~> 0.1"},
       {:erlsom, "~> 1.4"},
       {:excoveralls, "~> 0.5", only: :test},
       {:earmark, "~> 1.0", only: :dev},

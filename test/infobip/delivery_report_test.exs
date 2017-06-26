@@ -59,7 +59,7 @@ defmodule Infobip.DeliveryReportTest do
       Plug.Conn.resp(conn, 200, no_data_response)
     end
     response = DeliveryReport.fetch(message_id)
-    assert response == {:ok, :unknown}
+    assert response == {:ok, {:unknown, "NO_DATA"}}
   end
 
   test "handles a delivery report for a delivered message", %{
