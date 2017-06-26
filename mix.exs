@@ -28,6 +28,7 @@ defmodule Infobip.Mixfile do
       {:dialyxir, "~> 0.3", only: :dev},
       {:credo, "~> 0.4", only: :dev},
       {:bypass, "~> 0.5", only: :test},
+      {:dogma, "~> 0.1", only: :dev},
       {:inch_ex, "~> 0.5", only: :docs}
     ]
   end
