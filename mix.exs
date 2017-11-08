@@ -3,18 +3,18 @@ defmodule Infobip.Mixfile do
 
   def project do
     [app: :infobip,
-     version: "0.1.2",
+     version: "0.1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps,
+     deps: deps(),
      test_coverage: [tool: ExCoveralls],
      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test],
      description: "A simple Infobip REST API client for Elixir",
-     package: package]
+     package: package()]
   end
 
   def application do
-    [applications: [:logger, :httpoison, :xml_builder, :erlsom]]
+    [extra_applications: [:logger, :httpoison, :xml_builder, :erlsom]]
   end
 
   defp deps do

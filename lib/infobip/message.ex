@@ -19,7 +19,7 @@ defmodule Infobip.Message do
       source_npi: source_npi,
       destination_ton: destination_ton,
       destination_npi: destination_npi
-    } = http_config
+    } = http_config()
 
     {:SMS, nil, [
       {:authentification, nil, [
@@ -48,8 +48,7 @@ defmodule Infobip.Message do
       source_npi: source_npi,
       destination_ton: destination_ton,
       destination_npi: destination_npi
-    } = http_config
-
+    } = http_config()
     {:SMS, nil, [
       {:authentification, nil, [
         {:username, nil, system_id},

@@ -12,7 +12,7 @@ defmodule Infobip.TextMessage do
 
   @headers [{"content-type", "text/xml; charset=utf-8"}]
 
-  @type send_response :: {atom, integer} | {atom, {atom, any}}
+  @type send_response :: {:ok, integer | {atom, any}} | {:error, any}
 
   @doc """
   Sends a text message.
@@ -40,7 +40,7 @@ defmodule Infobip.TextMessage do
 
   @spec do_send(String.t) :: send_response
   defp do_send(payload) when is_binary(payload) do
-    http_config
+    http_config()
     |> Map.get(:send_url)
     |> post(payload, @headers)
     |> handle_send_reponse
@@ -63,7 +63,10 @@ defmodule Infobip.TextMessage do
   @spec parse_valid_send(tuple) :: send_response
   defp parse_valid_send(xml) do
     case xml do
-      {'RESPONSE', [], [{'status', [], [status_code]}, {'credits', [], [_credits]}]} ->
+      {
+        'RESPONSE', [],
+        [{'status', [], [status_code]}, {'credits', [], [_credits]}]
+      } ->
         case to_string(status_code) do
           "-1" ->
             {:error, {:infobip, :auth_failed}}

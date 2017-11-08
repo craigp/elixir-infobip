@@ -7,7 +7,7 @@ defmodule Infobip.DeliveryReport do
   import Infobip.Helper, only: [http_config: 0, handle_http_error: 1]
   alias HTTPoison.{Response, Error}
 
-  @type fetch_response :: {atom, {atom, String.t}}
+  @type fetch_response :: {:ok, {atom, String.t}} | {:error, any}
 
   @doc """
   Fetches a text message delivery report.
@@ -18,7 +18,7 @@ defmodule Infobip.DeliveryReport do
       delivery_report_url: url,
       system_id: id,
       password: pass
-    } = http_config
+    } = http_config()
     "#{url}?user=#{id}&password=#{pass}&messageId=#{message_id}"
     |> HTTPoison.get
     |> handle_delivery_report_response

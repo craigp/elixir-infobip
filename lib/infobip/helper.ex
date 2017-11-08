@@ -13,8 +13,7 @@ defmodule Infobip.Helper do
       nil ->
         raise "No :infobip config for env #{Mix.env}"
       config ->
-        config
-        |> Enum.into(%{})
+        Enum.into(config, %{})
     end
   end
 
