@@ -16,7 +16,7 @@ defmodule Infobip.DeliveryReportTest do
   <message id=\"10002\" sentdate=\"2016/09/04 15:51:44\" donedate=\"2016/09/04 15:51:45\"
     status=\"DELIVERED\" gsmerror=\"0\" price=\"17.0000\" pducount=\"1\" />
 </DeliveryReport>
-    """
+"""
     no_data_response = "NO_DATA"
     bypass = Bypass.open
     Application.put_env :infobip, :http, [

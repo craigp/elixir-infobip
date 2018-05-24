@@ -39,13 +39,13 @@ defmodule Infobip.TextMessageTest do
   <status>1</status>
   <credits>100</credits>
 </RESPONSE>
-      """,
+""",
       auth_failed_response: """
 <RESPONSE>
   <status>-1</status>
   <credits>100</credits>
 </RESPONSE>
-      """
+"""
     }}
   end
 
