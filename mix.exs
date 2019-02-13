@@ -8,7 +8,11 @@ defmodule Infobip.Mixfile do
      start_permanent: Mix.env == :prod,
      deps: deps(),
      test_coverage: [tool: ExCoveralls],
-     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test
+      ],
      description: "A simple Infobip REST API client for Elixir",
      package: package()]
   end
@@ -26,10 +30,10 @@ defmodule Infobip.Mixfile do
       {:earmark, "~> 1.0", only: :dev},
       {:ex_doc, "~> 0.13", only: :dev},
       {:dialyxir, "~> 0.3", only: :dev},
-      {:credo, "~> 0.4", only: :dev},
-      {:bypass, "~> 0.5", only: :test},
+      {:credo, "~> 1.0", only: :dev},
+      {:bypass, "~> 1.0", only: :test},
       {:dogma, "~> 0.1", only: :dev},
-      {:inch_ex, "~> 0.5", only: :docs}
+      {:inch_ex, "~> 2.0", only: :docs}
     ]
   end
 
