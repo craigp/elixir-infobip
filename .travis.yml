@@ -4,7 +4,7 @@ env:
 elixir:
 - 1.11.3-otp-23
 otp_release:
-- 23.2.3
+- 23.0
 script:
 - MIX_ENV=test mix do deps.get, test && mix compile && mix coveralls.travis
 notifications:
