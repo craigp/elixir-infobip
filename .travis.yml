@@ -2,7 +2,7 @@ language: elixir
 env:
 - MIX_ENV=test
 elixir:
-- 1.11.3-otp-23
+- 1.11.3
 otp_release:
 - 23.0
 script:
