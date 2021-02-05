@@ -1,12 +1,11 @@
-ExUnit.start
-
 defmodule Infobip.DeliveryReportTest do
 
   use ExUnit.Case
+
   alias Infobip.DeliveryReport
 
   setup do
-    message_id = "1234"
+    message_id = 1234
     delivered = {'DeliveryReport', [],
      [{'message', [{'pducount', '1'}, {'price', '17.0000'}, {'gsmerror', '0'},
         {'status', 'DELIVERED'}, {'donedate', '2016/09/04 15:40:22'},
@@ -19,7 +18,7 @@ defmodule Infobip.DeliveryReportTest do
 """
     no_data_response = "NO_DATA"
     bypass = Bypass.open
-    Application.put_env :infobip, :http, [
+    Application.put_env :infobip, :api, [
       send_url: "http://localhost:#{bypass.port}/api/sendsms/xml",
       delivery_report_url: "http://localhost:#{bypass.port}/api/dlrpull",
       source_msisdn: "",
@@ -54,11 +53,14 @@ defmodule Infobip.DeliveryReportTest do
   } do
     Bypass.expect bypass, fn conn ->
       assert "/api/dlrpull" == conn.request_path
-      assert "user=Infobip&password=password&messageId=1234" == conn.query_string
+      query = URI.decode_query(conn.query_string)
+      assert Map.get(query, "user") == "Infobip"
+      assert Map.get(query, "password") == "password"
+      assert Map.get(query, "messageId") == "1234"
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, no_data_response)
     end
-    response = DeliveryReport.fetch(message_id)
+    response = Infobip.delivery_report(message_id)
     assert response == {:ok, {:unknown, "NO_DATA"}}
   end
 
@@ -69,12 +71,26 @@ defmodule Infobip.DeliveryReportTest do
   } do
     Bypass.expect bypass, fn conn ->
       assert "/api/dlrpull" == conn.request_path
-      assert "user=Infobip&password=password&messageId=1234" == conn.query_string
+      query = URI.decode_query(conn.query_string)
+      assert Map.get(query, "user") == "Infobip"
+      assert Map.get(query, "password") == "password"
+      assert Map.get(query, "messageId") == "1234"
       assert "GET" == conn.method
       Plug.Conn.resp(conn, 200, valid_delivery_report_response)
     end
     response = Infobip.delivery_report(message_id)
     assert response == {:ok, {:delivered, "2016/09/04 15:51:45"}}
+  end
+
+  test "fails properly when Infobip API cannot be reached", %{
+    bypass: bypass,
+    message_id: message_id
+  } do
+    Bypass.down(bypass)
+    {
+      :error,
+      {:http, "Could not reach Infobip API"}
+    } = DeliveryReport.fetch(to_string(message_id))
   end
 
 end

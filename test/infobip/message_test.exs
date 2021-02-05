@@ -1,5 +1,3 @@
-ExUnit.start
-
 defmodule Infobip.MessageTest do
 
   use ExUnit.Case
@@ -38,7 +36,7 @@ defmodule Infobip.MessageTest do
     recipient: recipient,
     message: message
   } do
-    xml = Infobip.Message.build_message(recipient, message)
+    xml = Infobip.Message.build(recipient, message)
     xml = String.replace(xml, ~r/[\n\t\s]/, "")
     valid_xml = ~s"""
 <SMS>
@@ -70,7 +68,7 @@ defmodule Infobip.MessageTest do
     recipient: recipient,
     message: message
   } do
-    xml = Infobip.Message.build_message(recipient, message, message_id)
+    xml = Infobip.Message.build(recipient, message, message_id)
     xml = String.replace(xml, ~r/[\n\t\s]/, "")
     valid_xml = ~s"""
 <SMS>

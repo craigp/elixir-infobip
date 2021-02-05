@@ -3,7 +3,7 @@ defmodule Infobip.Mixfile do
 
   def project do
     [app: :infobip,
-     version: "0.1.5",
+     version: "0.2.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps(),
@@ -29,9 +29,9 @@ defmodule Infobip.Mixfile do
       {:excoveralls, "~> 0.5", only: :test},
       {:earmark, "~> 1.0", only: :dev},
       {:ex_doc, "~> 0.13", only: :dev},
-      {:dialyxir, "~> 0.3", only: :dev},
+      {:dialyxir, "~> 1.0", only: :dev},
       {:credo, "~> 1.0", only: :dev},
-      {:bypass, "~> 1.0", only: :test},
+      {:bypass, "~> 2.0", only: :test},
       {:dogma, "~> 0.1", only: :dev},
       {:inch_ex, "~> 2.0", only: :docs}
     ]

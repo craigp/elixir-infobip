@@ -1,53 +1,49 @@
-defmodule Infobip.TextMessage do
+alias Infobip.{TextMessage, Message, Common}
+
+defmodule TextMessage do
 
   @moduledoc """
   Builds and sends a text message.
   """
 
-  alias Infobip.{Helper, Message}
-  alias HTTPoison.{Response, Error}
-  import Message
-  import Helper, only: [http_config: 0, handle_http_error: 1]
-  import HTTPoison, only: [post: 3]
-
   @headers [{"content-type", "text/xml; charset=utf-8"}]
 
-  @type send_response :: {:ok, integer | {atom, any}} | {:error, any}
+  @type send_response :: :ok | {:error, {:xml, term} | {:infobip, term}}
 
   @doc """
   Sends a text message.
   """
-  @spec send(String.t, String.t) :: send_response
+  @spec send(binary, binary) :: send_response
   def send(recipient, message)
   when is_binary(recipient)
   and is_binary(message)
   do
     recipient
-    |> build_message(message)
+    |> Message.build(message)
     |> do_send
   end
 
-  @spec send(String.t, String.t, String.t) :: send_response
+  @spec send(binary, binary, binary) :: send_response
   def send(recipient, message, message_id)
   when is_binary(recipient)
   and is_binary(message)
   and is_binary(message_id)
   do
     recipient
-    |> build_message(message, message_id)
+    |> Message.build(message, message_id)
     |> do_send
   end
 
-  @spec do_send(String.t) :: send_response
+  @spec do_send(binary) :: send_response
   defp do_send(payload) when is_binary(payload) do
-    http_config()
+    Common.http_config()
     |> Map.get(:send_url)
-    |> post(payload, @headers)
+    |> HTTPoison.post(payload, @headers)
     |> handle_send_reponse
   end
 
   @spec handle_send_reponse({atom, map}) :: send_response
-  defp handle_send_reponse({:ok, %Response{body: body}}) do
+  defp handle_send_reponse({:ok, %HTTPoison.Response{body: body}}) do
     case :erlsom.simple_form(body) do
       {:ok, xml, _} ->
         parse_valid_send(xml)
@@ -56,8 +52,8 @@ defmodule Infobip.TextMessage do
     end
   end
 
-  defp handle_send_reponse({:error, %Error{id: _id, reason: reason}}) do
-    handle_http_error(reason)
+  defp handle_send_reponse({:error, %HTTPoison.Error{id: _id, reason: reason}}) do
+    Common.handle_http_error(reason)
   end
 
   @spec parse_valid_send(tuple) :: send_response
@@ -78,11 +74,11 @@ defmodule Infobip.TextMessage do
             {:error, {:infobip, :no_recipients}}
           "-5" ->
             {:error, {:infobip, :general_error}}
-          message_count ->
-            {:ok, String.to_integer(message_count)}
+          _message_count ->
+            :ok
         end
-      _else ->
-        {:error, {:parse, "Unrecognised response"}}
+      resp ->
+        {:error, {:infobip, "Unrecognised response: #{inspect(resp)}"}}
     end
   end
 

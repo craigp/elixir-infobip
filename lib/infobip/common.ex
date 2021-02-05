@@ -1,4 +1,4 @@
-defmodule Infobip.Helper do
+defmodule Infobip.Common do
 
   @moduledoc """
   Helper module for making Infobip requests.
@@ -9,9 +9,9 @@ defmodule Infobip.Helper do
   """
   @spec http_config() :: map
   def http_config do
-    case Application.get_env(:infobip, :http) do
+    case Application.get_env(:infobip, :api) do
       nil ->
-        raise "No :infobip config for env #{Mix.env}"
+        raise "No Infobip config available"
       config ->
         Enum.into(config, %{})
     end
@@ -19,6 +19,11 @@ defmodule Infobip.Helper do
 
   @doc """
   Generates a meaningful error message for an HTTP error.
+
+  ### Examples
+
+      iex> handle_http_error(:nxdomain)
+      {:error, {:http, "Could not reach Infobip API"}}
   """
   @spec handle_http_error(any) :: {atom, {atom, any}}
   def handle_http_error(reason) do

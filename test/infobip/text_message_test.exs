@@ -1,16 +1,14 @@
-ExUnit.start
-
 defmodule Infobip.TextMessageTest do
 
   use ExUnit.Case
   alias Infobip.TextMessage
 
   setup do
-    message_id = "1234"
+    message_id = 1234
     recipient = "27821115555"
     message = "This is a test message"
     bypass = Bypass.open
-    Application.put_env :infobip, :http, [
+    Application.put_env :infobip, :api, [
       send_url: "http://localhost:#{bypass.port}/api/sendsms/xml",
       delivery_report_url: "http://localhost:#{bypass.port}/api/dlrpull",
       source_msisdn: "",
@@ -91,13 +89,9 @@ defmodule Infobip.TextMessageTest do
       assert "POST" == conn.method
       Plug.Conn.resp(conn, 200, valid_send_response)
     end
-    {:ok, 1} =
-      recipient
-      |> Infobip.send(message)
-    {:ok, 1} =
-      recipient
-      |> Infobip.send(message, message_id)
+    :ok = Infobip.send(recipient, message)
+    :ok = Infobip.send(recipient, message, message_id)
+
   end
 
 end
-

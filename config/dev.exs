@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :infobip, :http,
+config :infobip, :api,
   send_url: "http://api2.infobip.com/api/sendsms/xml",
   delivery_report_url: "http://api2.infobip.com/api/dlrpull",
   source_msisdn: "",
